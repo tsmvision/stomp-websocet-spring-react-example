@@ -27,14 +27,15 @@ class GreetingController(private val messagingTemplate: SimpMessageSendingOperat
         return listOf("H", "E", "L", "L", "O", "W", "O", "R", "L", "D", "!")
     }
 
-//    @SendTo("/topic/item")
-//    fun getItemList(): List<String> {
-//        return listOf("H", "E", "L", "L", "O", "W", "O", "R", "L", "D", "!", "!", "!")
-//    }
+    @MessageMapping("/item")
+    @SendTo("/topic/item1")
+    fun getItemList(data: List<String>): List<String> {
+        return data
+    }
 
     // SubscribeMapping only works with "/app/item" ("/app" is excluded by default)
-    @SubscribeMapping("/item")
-    fun getSubscribedummyList(): List<String> {
-        return listOf("H", "E", "L", "L", "O", "W", "O", "R", "L", "D", "!", "!", "!", "!")
-    }
+//    @SubscribeMapping("/item")
+//    fun getSubscribedummyList(): List<String> {
+//        return listOf("H", "E", "L", "L", "O", "W", "O", "R", "L", "D", "!", "!", "!", "!")
+//    }
 }

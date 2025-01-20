@@ -24,6 +24,12 @@ stompClient.onConnect = (frame) => {
     });
 
     console.log('/topic/item');
+    stompClient.subscribe('/topic/item', (data) => {
+        console.log('data.body: ', data.body);
+        //     // showGreeting(JSON.parse(greeting.body).content);
+    });
+
+    console.log('/topic/item');
     stompClient.subscribe('/app/item', (data) => {
         console.log('data.body: ', data.body);
         //     // showGreeting(JSON.parse(greeting.body).content);
