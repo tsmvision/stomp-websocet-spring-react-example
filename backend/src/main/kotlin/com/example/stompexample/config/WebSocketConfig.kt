@@ -10,7 +10,9 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @EnableWebSocketMessageBroker
 class WebSocketConfig: WebSocketMessageBrokerConfigurer {
     override fun configureMessageBroker(registry: MessageBrokerRegistry) {
-        registry.enableSimpleBroker("/tpoic")
+        // send data to subscribers
+        registry.enableSimpleBroker("/topic")
+        // go to handler to process something with server
         registry.setApplicationDestinationPrefixes("/app")
     }
 

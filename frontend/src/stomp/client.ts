@@ -6,15 +6,27 @@ import { Client } from '@stomp/stompjs';
 
 // create send button
 
-const stompClient = new Client({
-    brokerURL: 'ws://localhost:8080/gs-guide-websocket'
+export const stompClient = new Client({
+    brokerURL: 'ws://localhost:8080/ws'
 });
 
 stompClient.onConnect = (frame) => {
     // setConnected(true);
     console.log('Connected: ' + frame);
-    stompClient.subscribe('/topic/greetings', (greeting) => {
-        // showGreeting(JSON.parse(greeting.body).content);
+    stompClient.subscribe('/topic/greetings', (data) => {
+        console.log('data.body: ', JSON.parse(data.body));
+    //     // showGreeting(JSON.parse(greeting.body).content);
+    });
+
+    stompClient.subscribe('/topic/string_list', (data) => {
+        console.log('data: ', JSON.parse(data.body));
+        //     // showGreeting(JSON.parse(greeting.body).content);
+    });
+
+    console.log('/topic/item');
+    stompClient.subscribe('/app/item', (data) => {
+        console.log('data.body: ', data.body);
+        //     // showGreeting(JSON.parse(greeting.body).content);
     });
 };
 
@@ -39,21 +51,22 @@ stompClient.onStompError = (frame) => {
 //     $("#greetings").html("");
 // }
 
-function connect() {
-    stompClient.activate();
+// export const connect = (): void => {
+//     stompClient.activate();
+// }
+//
+// export const disconnect = (): void => {
+//     stompClient.deactivate();
+//     // setConnected(false);
+//     console.log("Disconnected");
+// }
+
+export const sendName = (name: string): void => {
+    sendName(name);
 }
 
-function disconnect() {
-    stompClient.deactivate();
-    // setConnected(false);
-    console.log("Disconnected");
-}
+export const getList = () => {
 
-function sendName() {
-    stompClient.publish({
-        destination: "/app/hello",
-        body: JSON.stringify({'name': $("#name").val()})
-    });
 }
 
 // function showGreeting(message) {
