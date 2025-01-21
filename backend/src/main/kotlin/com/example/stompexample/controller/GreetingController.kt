@@ -5,14 +5,13 @@ import com.example.stompexample.dto.HelloMessage
 import org.springframework.messaging.handler.annotation.MessageMapping
 import org.springframework.messaging.handler.annotation.SendTo
 import org.springframework.messaging.simp.SimpMessageSendingOperations
-import org.springframework.messaging.simp.annotation.SubscribeMapping
 import org.springframework.stereotype.Controller
 
 @Controller
 class GreetingController(private val messagingTemplate: SimpMessageSendingOperations) {
 
-    @MessageMapping("/hello")
-    @SendTo("/topic/greetings")
+    @MessageMapping("/greeting")
+    @SendTo("/topic/greeting")
     fun greeting(message: HelloMessage): Greeting {
         Thread.sleep(1000)
         return Greeting("Hello ${message.name}")
@@ -28,7 +27,7 @@ class GreetingController(private val messagingTemplate: SimpMessageSendingOperat
     }
 
     @MessageMapping("/item")
-    @SendTo("/topic/item1")
+    @SendTo("/topic/item")
     fun getItemList(data: List<String>): List<String> {
         return data
     }
