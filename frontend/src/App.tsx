@@ -2,6 +2,8 @@ import {FC, useEffect, useState} from 'react'
 import './App.css'
 import {Button, Col, Container, Form, InputGroup, Row} from "react-bootstrap";
 import {
+    Greeting,
+    stompApi,
     useGetConnectionStatusQuery,
     useGetGreetingQuery, useGetItemListQuery,
     useSendNameMutation
@@ -10,16 +12,11 @@ import {useAppDispatch, useAppSelector} from "./redux/hooks.ts";
 import {setStompConnected, setStompDisconnected} from "./redux/stompConnectionStatus.ts";
 import {stompClient} from "./stomp/client.ts";
 
-// container
-// button connect / disconnect
-// received message input
-// submit button
-
 // TODO: stomp.js connection status tracking
 // TODO: create rtk query for stomp.js subscribe endpoint
 const App: FC = () => {
     const [name, setName] = useState<string>('');
-    const [messageList, setMessageList] = useState<string[]>([]);
+    const [messageList, setMessageList] = useState<Greeting[]>([]);
     const { isConnected } = useAppSelector(state => state.stompConnectionStatus);
     const dispatch = useAppDispatch();
 
@@ -32,7 +29,7 @@ const App: FC = () => {
         sendName(name);
     };
 
-    const handleUpdateMessageList = (newData: string | undefined) => {
+    const handleUpdateMessageList = (newData: Greeting | undefined) => {
         if (!newData) {
             return;
         }
@@ -42,12 +39,16 @@ const App: FC = () => {
         })
     };
 
-    const handleStompConnection = () => {
+    // fast deactivate -> activate not calling subscribiptions, slow deactivate -> activate load subscriptions
+    const handleStompConnection = async () => {
         if (isConnected) {
-            void stompClient.deactivate();
+            await stompClient.deactivate()
+            dispatch(stompApi.util.resetApiState());
             return;
         }
 
+        await stompClient.deactivate()
+        dispatch(stompApi.util.resetApiState());
         stompClient.activate();
     };
 
@@ -60,35 +61,21 @@ const App: FC = () => {
         setName('');
     }, [isSendNameSuccess]);
 
-  //
-  //   const handleSendList = () => {
-  //       if (!stompClient.connected) {
-  //           console.log('stomp not connected yet');
-  //           return;
-  //       }
-  //       // sendName(messageToSend);
-  //       //
-  //       stompClient.publish({
-  //           destination: "/app/string_list",
-  //           // body: JSON.stringify({'name': messageToSend}),
-  //       });
-  //   }
+    useEffect(() => {
+        setMessageList([]);
+    }, [isConnected]);
 
     useEffect(() => {
         if (stompConnectionStatus) {
             dispatch(setStompConnected());
-        } else {
-            dispatch(setStompDisconnected());
+            return;
         }
+        dispatch(setStompDisconnected());
     }, [stompConnectionStatus, dispatch]);
 
     useEffect(() => {
         console.log('itemList: ', itemList);
     }, [itemList]);
-
-    useEffect(() => {
-        stompClient.activate();
-    }, []);
 
   return (
     <Container>
@@ -110,14 +97,33 @@ const App: FC = () => {
                 <Button onClick={handleSendName}>Submit</Button>
             </InputGroup>
         </Row>
+        <Row>
+            <Col className='mt-3'>
+                <h3>Data from /topic/greeting</h3>
+            </Col>
+        </Row>
         {
             messageList.map((message )=>
                 <Row>
                     <Col>
-                        <h3>{message}</h3>
+                        <h3>{message.content}</h3>
                     </Col>
                 </Row>)
         }
+
+        <Row>
+            <Col className='mt-5'>
+                <h3>Data from /topic/item</h3>
+            </Col>
+        </Row>
+        <Row>
+            <Col>
+                {
+                    (itemList === undefined) ? 'NO DATA': itemList.toString()
+                }
+            </Col>
+
+        </Row>
 
         {/*<Row>*/}
         {/*    <Col>*/}

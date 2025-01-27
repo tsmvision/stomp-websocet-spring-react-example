@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RestController
 class TestController(private val messagingTemplate: SimpMessageSendingOperations) {
     @GetMapping
     fun trigger() {
-        val greetingsMessage = HelloMessage("Hello from trigger!!!!!!!!!")
-        messagingTemplate.convertAndSend("/topic/greetings", greetingsMessage)
+//        val greetingsMessage = HelloMessage("Hello from trigger!!!!!!!!!")
+//        messagingTemplate.convertAndSend("/topic/greetings", greetingsMessage)
 
         val itemMessage = listOf("Z", "Z", "Z")
         messagingTemplate.convertAndSend("/topic/item", itemMessage)

@@ -2,16 +2,20 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import {stompClient} from "../../stomp/client.ts";
 
-interface Greeting {
+export interface Greeting {
     content: string,
 }
+
+const CLEAR = 'CLEAR';
 
 // Define a service using a base URL and expected endpoints
 export const stompApi = createApi({
     reducerPath: 'stompApi',
     baseQuery: fetchBaseQuery({ baseUrl: '' }),
+    tagTypes: [CLEAR],
     endpoints: (builder) => ({
         getConnectionStatus: builder.query<boolean, void>({
+            providesTags: [CLEAR],
             queryFn: () => {
                 return {
                     data: false
@@ -35,31 +39,31 @@ export const stompApi = createApi({
                 await cacheEntryRemoved;
             }
         }),
-        getGreeting: builder.query<string, void>({
+        getGreeting: builder.query<Greeting | undefined, void>({
+            providesTags: [CLEAR],
             queryFn: () => {
                 return {
-                    data: '',
+                    data: undefined,
                 };
             },
             async onCacheEntryAdded(_, { updateCachedData, cacheDataLoaded, cacheEntryRemoved }){
                 console.log('getGreeting...');
                 await cacheDataLoaded;
 
-                // stompClient.onConnect = (frame) => {
-                //     console.log('frame: ', frame);
-                    stompClient.subscribe('/topic/greeting', (data) => {
-                        const body = JSON.parse(data.body) as Greeting;
-                        console.log('body: ', body);
-                        updateCachedData(() => {
-                            return body.content;
-                        });
+                    // console.log('frame: ', frame);
+                const handler = stompClient.subscribe('/topic/greeting', (data) => {
+                    const body = JSON.parse(data.body) as Greeting;
+                    console.log('body: ', body);
+                    updateCachedData(() => {
+                        return body;
                     });
-                // }
-
+                });
                 await cacheEntryRemoved;
+                handler.unsubscribe();
             }
         }),
         getItemList: builder.query<string[], void>({
+            providesTags: [CLEAR],
             queryFn: () => {
                 return {
                     data: [],
@@ -69,7 +73,7 @@ export const stompApi = createApi({
                 console.log('getGreeting...');
                 await cacheDataLoaded;
 
-                stompClient.subscribe('/topic/item', (data) => {
+                const handler = stompClient.subscribe('/topic/item', (data) => {
                     const body = JSON.parse(data.body) as string[];
                     console.log('body: ', body);
                     updateCachedData(() => {
@@ -78,6 +82,7 @@ export const stompApi = createApi({
                 });
 
                 await cacheEntryRemoved;
+                handler.unsubscribe();
             }
         }),
         sendName: builder.mutation<void, string>({
@@ -91,6 +96,19 @@ export const stompApi = createApi({
                 };
             },
         }),
+        // disconnect: builder.mutation<void, string>({
+        //     invalidatesTags: [CLEAR],
+        //     queryFn: (name) => {
+        //         stompClient.publish({
+        //             destination: "/app/greeting",
+        //             body: JSON.stringify({'name': name}),
+        //         });
+        //         return {
+        //             data: undefined,
+        //         };
+        //     },
+        // }),
+
     }),
 });
 
